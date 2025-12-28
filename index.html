@@ -3,65 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>北海道四人自駕遊</title>
+    <title>九州自駕遊：熊本 & 福岡</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Noto Sans JP', sans-serif; background-color: #F4F7FB; }
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #F0F4F8; margin: 0; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .app-container { max-width: 450px; margin: 0 auto; min-height: 100vh; background: white; position: relative; }
+        .app-container { max-width: 500px; margin: 0 auto; min-height: 100vh; background: white; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .banner-mask { position: absolute; bottom: 0; left: 0; right: 0; h: 50px; background: white; border-radius: 40px 40px 0 0; z-index: 10; }
     </style>
 </head>
 <body>
-    <div id="app" class="app-container shadow-xl">
-        <div class="relative h-64 overflow-hidden">
-            <img src="banner.jpg" class="w-full h-full object-cover" alt="Banner">
-            <div class="absolute bottom-0 left-0 right-0 h-12 bg-white rounded-t-[40px] z-10"></div>
+    <div id="app" class="app-container">
+        
+        <div class="relative h-[250px] overflow-hidden">
+            <img src="banner.jpg" class="w-full h-full object-cover" alt="九州自駕遊">
+            <div class="banner-mask h-12"></div>
+            
             <div class="absolute right-4 bottom-2 flex space-x-2 z-20">
                 <button v-for="tab in tabs" @click="activeTab = tab.id" 
-                    :class="activeTab === tab.id ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'"
-                    class="w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition">
+                    :class="activeTab === tab.id ? 'bg-blue-600 text-white scale-110' : 'bg-white/80 text-blue-600 backdrop-blur-md'"
+                    class="w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-300">
                     <i :class="tab.icon"></i>
                 </button>
             </div>
         </div>
 
-        <div class="px-5 pb-20">
+        <div class="px-5 pb-24 relative z-20 -mt-2">
+            
             <div v-if="activeTab === 'schedule'">
-                <h1 class="text-2xl font-bold text-blue-900 mb-4">🗓️ 每日行程</h1>
+                <div class="flex justify-between items-end mb-4">
+                    <h1 class="text-2xl font-bold text-blue-900">🗓️ 九州行程</h1>
+                    <span class="text-xs text-blue-400 font-medium">5 Days 4 Nights</span>
+                </div>
+
                 <div class="flex overflow-x-auto space-x-3 pb-4 hide-scrollbar">
-                    <div v-for="d in days" @click="activeDay = d.date"
-                        :class="activeDay === d.date ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500'"
-                        class="min-w-[65px] p-3 rounded-2xl text-center cursor-pointer">
-                        <div class="text-xs">{{ d.week }}</div>
-                        <div class="text-lg font-bold">{{ d.day }}</div>
+                    <div v-for="(d, index) in days" :key="index" @click="activeDayIndex = index"
+                        :class="activeDayIndex === index ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-100 text-gray-500'"
+                        class="min-w-[70px] p-3 rounded-2xl text-center cursor-pointer transition-all">
+                        <div class="text-[10px] uppercase">{{ d.week }}</div>
+                        <div class="text-xl font-bold">{{ d.date }}</div>
                     </div>
                 </div>
-                <div class="bg-blue-50 p-4 rounded-2xl mb-4 flex justify-between items-center">
-                    <div><i class="fa-solid fa-snowflake text-blue-400 mr-2"></i>札幌今日 3°C</div>
-                    <div class="text-xs text-blue-400">體感 -1°C</div>
-                </div>
-                <div v-for="item in filteredItems" :key="item.id" class="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm mb-4">
-                    <div class="flex justify-between items-start">
-                        <span class="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded">{{ item.type }}</span>
-                        <a :href="'https://www.google.com/maps/search/' + item.title" target="_blank" class="text-blue-500"><i class="fa-solid fa-location-arrow"></i></a>
+
+                <div class="bg-blue-50/50 border border-blue-100 p-4 rounded-2xl mb-6 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-cloud-sun text-blue-400 text-2xl mr-3"></i>
+                        <div>
+                            <div class="text-sm font-bold text-blue-800">{{ currentCity }} 天氣</div>
+                            <div class="text-[10px] text-blue-400">體感溫度 12°C</div>
+                        </div>
                     </div>
-                    <h3 class="font-bold text-gray-800 mt-2">{{ item.title }}</h3>
-                    <p class="text-xs text-gray-500 mt-1">{{ item.time }} | {{ item.note }}</p>
+                    <div class="text-2xl font-bold text-blue-600">14°C</div>
+                </div>
+
+                <div class="space-y-4">
+                    <div v-for="(item, idx) in filteredItems" :key="item.id">
+                        <div v-if="idx > 0" class="flex items-center ml-6 my-2 text-gray-400 text-xs">
+                            <div class="border-l-2 border-dashed border-gray-200 h-4 mr-3"></div>
+                            <i :class="item.transportIcon" class="mr-2"></i>
+                            <span>約 {{ item.travelTime }}</span>
+                        </div>
+
+                        <div class="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition">
+                            <div class="flex justify-between items-start">
+                                <span :class="categoryColor(item.category)" class="text-[10px] font-bold px-2 py-1 rounded-lg">
+                                    {{ item.category }}
+                                </span>
+                                <button @click="goNav(item.title)" class="text-blue-500 bg-blue-50 w-8 h-8 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-location-arrow text-sm"></i>
+                                </button>
+                            </div>
+                            <h3 class="font-bold text-gray-800 mt-2 text-lg">{{ item.title }}</h3>
+                            <div class="mt-2 space-y-1">
+                                <p class="text-xs text-gray-500"><i class="fa-regular fa-clock mr-1"></i> {{ item.time }}</p>
+                                <p v-if="item.price" class="text-xs text-gray-500"><i class="fa-solid fa-ticket mr-1"></i> 門票：{{ item.price }}</p>
+                                <p class="text-xs text-blue-600 font-medium"><i class="fa-solid fa-quote-left mr-1"></i> {{ item.note }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div v-else class="text-center py-20 text-gray-400">
-                <i :class="currentTabIcon" class="text-5xl mb-4 block"></i>
-                這裡目前是 {{ activeTab }} 的內容預留空間
+            <div v-else-if="activeTab === 'info'" class="space-y-6">
+                <h1 class="text-2xl font-bold text-blue-900 mb-4">ℹ️ 旅遊資訊</h1>
+                
+                <div class="bg-blue-600 p-5 rounded-3xl text-white shadow-lg">
+                    <div class="text-sm opacity-80 mb-2">匯率換算 (1 JPY ≈ 0.21 TWD)</div>
+                    <div class="flex items-center space-x-3">
+                        <input type="number" v-model="jpyInput" class="bg-white/20 border-none rounded-xl p-3 w-full text-white placeholder-white/50" placeholder="輸入日幣 JPY">
+                        <i class="fa-solid fa-equals"></i>
+                        <div class="text-xl font-bold">NT${{ (jpyInput * 0.21).toFixed(0) }}</div>
+                    </div>
+                </div>
+
+                <div class="bg-white border p-4 rounded-2xl space-y-3">
+                    <div class="flex items-center text-blue-600 font-bold border-b pb-2">
+                        <i class="fa-solid fa-plane mr-2"></i> 航班資訊
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>去程：CI116</span>
+                        <span>09:30 TPE → 12:45 FUK</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>回程：CI117</span>
+                        <span>18:00 FUK → 19:45 TPE</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="tel:110" class="bg-red-50 text-red-600 p-3 rounded-2xl text-center font-bold border border-red-100">
+                        <i class="fa-solid fa-shield-halved mr-1"></i> 警察 110
+                    </a>
+                    <a href="tel:119" class="bg-orange-50 text-orange-600 p-3 rounded-2xl text-center font-bold border border-orange-100">
+                        <i class="fa-solid fa-ambulance mr-1"></i> 救護 119
+                    </a>
+                </div>
             </div>
+
+            <div v-else class="text-center py-20 text-gray-300">
+                <i :class="tabs.find(t=>t.id===activeTab).icon" class="text-6xl mb-4"></i>
+                <p>功能開發中...</p>
+            </div>
+
         </div>
 
-        <button class="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl text-2xl">
+        <button class="fixed bottom-8 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition active:scale-90 z-50">
             <i class="fa-solid fa-plus"></i>
         </button>
+
     </div>
 
     <script>
@@ -69,26 +141,64 @@
         createApp({
             setup() {
                 const activeTab = ref('schedule');
-                const activeDay = ref('12-01');
+                const activeDayIndex = ref(0);
+                const jpyInput = ref('');
+
                 const tabs = [
                     { id: 'schedule', icon: 'fa-solid fa-calendar-days' },
-                    { id: 'info', icon: 'fa-solid fa-info-circle' },
-                    { id: 'shop', icon: 'fa-solid fa-cart-shopping' },
+                    { id: 'info', icon: 'fa-solid fa-circle-info' },
+                    { id: 'shop', icon: 'fa-solid fa-basket-shopping' },
                     { id: 'cost', icon: 'fa-solid fa-coins' }
                 ];
-                const days = [
-                    { date: '12-01', week: 'Fri', day: '6' },
-                    { date: '12-02', week: 'Sat', day: '7' },
-                    { date: '12-03', week: 'Sun', day: '8' }
-                ];
-                const items = ref([
-                    { id: 1, date: '12-01', type: '航班', title: '新千歲機場', time: '13:15 抵達', note: '華航 CI130' },
-                    { id: 2, date: '12-01', type: '住宿', title: '札幌美居飯店', time: '15:00 Check-in', note: '薄野區' }
-                ]);
-                const filteredItems = computed(() => items.value.filter(i => i.date === activeDay.value));
-                const currentTabIcon = computed(() => tabs.find(t => t.id === activeTab.value)?.icon);
 
-                return { activeTab, tabs, days, activeDay, items, filteredItems, currentTabIcon };
+                const days = [
+                    { date: '01', week: 'Fri', city: '熊本' },
+                    { date: '02', week: 'Sat', city: '熊本' },
+                    { date: '03', week: 'Sun', city: '福岡' },
+                    { date: '04', week: 'Mon', city: '福岡' },
+                    { date: '05', week: 'Tue', city: '福岡' }
+                ];
+
+                const scheduleItems = ref([
+                    // Day 1: 抵達與熊本
+                    { id: 1, dayIdx: 0, category: '航班', title: '福岡國際機場 (FUK)', time: '12:45 抵達', note: '入境、提領行李', transportIcon: 'fa-solid fa-plane', travelTime: '-' },
+                    { id: 2, dayIdx: 0, category: '租車', title: 'Budget 租車 博多站前', time: '14:30', note: '取車並出發前往熊本', transportIcon: 'fa-solid fa-car', travelTime: '1小時 40分' },
+                    { id: 3, dayIdx: 0, category: '住宿', title: '熊本大和 Roynet 飯店', time: '17:00', note: 'Check-in 休息', transportIcon: 'fa-solid fa-car', travelTime: '20分' },
+                    // Day 2: 熊本探索
+                    { id: 4, dayIdx: 1, category: '景點', title: '熊本城', time: '09:30', price: '800 JPY', note: '日本三大名城之一', transportIcon: 'fa-solid fa-car', travelTime: '15分' },
+                    { id: 5, dayIdx: 1, category: '美食', title: '勝烈亭 豬排', time: '12:30', note: '必吃排隊名店', transportIcon: 'fa-solid fa-person-walking', travelTime: '10分' },
+                    { id: 6, dayIdx: 1, category: '景點', title: '水前寺成趣園', time: '15:00', price: '400 JPY', note: '優美回遊式庭園', transportIcon: 'fa-solid fa-car', travelTime: '20分' },
+                    // Day 3: 前往福岡
+                    { id: 7, dayIdx: 2, category: '景點', title: '阿蘇大觀峰', time: '10:00', note: '看阿蘇五岳美景', transportIcon: 'fa-solid fa-car', travelTime: '1小時' },
+                    { id: 8, dayIdx: 2, category: '住宿', title: '福岡三井花園飯店', time: '18:00', note: '博多站附近', transportIcon: 'fa-solid fa-car', travelTime: '2小時' },
+                    // Day 4: 福岡景點
+                    { id: 9, dayIdx: 3, category: '景點', title: '太宰府天滿宮', time: '10:00', note: '梅枝餅與學問之神', transportIcon: 'fa-solid fa-car', travelTime: '40分' },
+                    { id: 10, dayIdx: 3, category: '美食', title: '一蘭拉麵總本店', time: '19:00', note: '中洲川端屋台區', transportIcon: 'fa-solid fa-car', travelTime: '30分' },
+                    // Day 5: 購物與返程
+                    { id: 11, dayIdx: 4, category: '購物', title: 'Lalaport 福岡', time: '11:00', note: '看 1:1 鋼彈', transportIcon: 'fa-solid fa-car', travelTime: '20分' },
+                    { id: 12, dayIdx: 4, category: '航班', title: '福岡機場', time: '16:00', note: 'CI117 返台', transportIcon: 'fa-solid fa-car', travelTime: '15分' }
+                ]);
+
+                const currentCity = computed(() => days[activeDayIndex.value].city);
+                const filteredItems = computed(() => scheduleItems.value.filter(item => item.dayIdx === activeDayIndex.value));
+
+                const categoryColor = (cat) => {
+                    const colors = {
+                        '航班': 'bg-indigo-100 text-indigo-600',
+                        '景點': 'bg-green-100 text-green-600',
+                        '美食': 'bg-orange-100 text-orange-600',
+                        '住宿': 'bg-blue-100 text-blue-600',
+                        '租車': 'bg-gray-100 text-gray-600',
+                        '購物': 'bg-pink-100 text-pink-600'
+                    };
+                    return colors[cat] || 'bg-gray-100 text-gray-600';
+                };
+
+                const goNav = (title) => {
+                    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(title)}`, '_blank');
+                };
+
+                return { activeTab, activeDayIndex, tabs, days, filteredItems, currentCity, categoryColor, goNav, jpyInput };
             }
         }).mount('#app');
     </script>
