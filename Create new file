@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>九州自駕遊：熊本 & 福岡編輯版</title>
+    <title>熊本 & 福岡編輯版</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -198,11 +198,11 @@
 
                 // 初始資料
                 const defaultDays = [
-                    { date: '12/28', week: 'Sun', city: '熊本' },
-                    { date: '12/29', week: 'Mon', city: '熊本' },
-                    { date: '12/30', week: 'Tue', city: '福岡' },
-                    { date: '12/31', week: 'Wed', city: '福岡' },
-                    { date: '01/01', week: 'Thu', city: '福岡' }
+                    { date: '01/04', week: 'Sun', city: '熊本' },
+                    { date: '01/05', week: 'Mon', city: '熊本' },
+                    { date: '01/06', week: 'Tue', city: '福岡' },
+                    { date: '01/07', week: 'Wed', city: '福岡' },
+                    { date: '01/08', week: 'Thu', city: '福岡' }
                 ];
 
                 const defaultItems = [
